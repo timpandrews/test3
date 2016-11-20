@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="col-sm-6 col-sm-offset-3">
+    <h1>{{ title }}</h1>
+
+    <form method="GET" action="">
+        <input type="text" name="query" placeholder="Search Posts" value="{{ request.GET.query }}"/>
+        <input type="submit" value="Search"/>
+    </form>
+    <br>
+
+    <a href="{% url 'posts:create' %}" class="btn btn-primary" role="button">Add New</a>
+    <br><br>
+
+    {% for obj in object_list %}
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="thumbnail">
+                    {% if obj.image %}
+                        <img src="{{ obj.image.url }}" class="img-responsive" />
+                    {% endif %}
+                    <div class="caption">
+                        {% if obj.draft or obj.publish > today %}
+                            <span style="color:red;">
+                                Staff Only:
+                                {% if obj.draft %}<i>Draft</i>{% endif %}
+                                {% if obj.publish > today %}<i>Not Yet Published</i>{% endif %}
+                            </span>
+                        {% endif %}
+                        <h3>
+                            <small>{{ obj.id }}:</small>&nbsp;&nbsp;
+                            {{ obj.title }}
+                            <small>{{ obj.publish|timesince }} ago</small>
+
+                        </h3>
+                        {% if obj.user.get_full_name %}
+                            <p>Author: {{ obj.user.get_full_name }}</p>
+                        {% else %}
+                            <p>Author: {{ obj.user }}</p>
+                        {% endif %}
+                        <p>{{ obj.content|linebreaks|truncatechars:120 }}</p>
+                        <p>
+                            <a href="{{ obj.get_absolute_url }}" class="btn btn-primary" role="button">View Detail</a>
+                        </p>
+                    </div> <!-- /caption -->
+                </div> <!-- /thumbnail -->
+            </div> <!-- /col -->
+        </div> <!-- /row -->
+    {% endfor %}
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if object_list.has_previous %}
+                <a href="?{{ page_request_var }}={{ object_list.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ object_list.number }} of {{ object_list.paginator.num_pages }}.
+            </span>
+
+            {% if object_list.has_next %}
+                <a href="?{{ page_request_var }}={{ object_list.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}">next</a>
+            {% endif %}
+        </span>
+    </div>
+
+</div> <!-- /col -->
+{% endblock %}
